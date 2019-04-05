@@ -17,14 +17,12 @@
 package com.android.systemui.fingerprint;
 
 import android.content.pm.PackageManager;
-import android.util.Slog;
+import android.util.Log;
 import android.view.View;
 
 import com.android.systemui.SystemUI;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
-
-import lineageos.app.LineageContextConstants;
 
 public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callbacks {
     private static final String TAG = "FODCircleViewImpl";
@@ -33,29 +31,20 @@ public class FODCircleViewImpl extends SystemUI implements CommandQueue.Callback
 
     @Override
     public void start() {
-        PackageManager packageManager = mContext.getPackageManager();
-        if (!packageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT) ||
-                !packageManager.hasSystemFeature(LineageContextConstants.Features.FOD)) {
-            return;
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            getComponent(CommandQueue.class).addCallbacks(this);
         }
-        getComponent(CommandQueue.class).addCallbacks(this);
-        try {
+    }
+
+    @Override
+    public void handleInDisplayFingerprintView(boolean show, boolean isEnrolling) {
+        if (mFodCircleView == null) {
             mFodCircleView = new FODCircleView(mContext);
-        } catch (RuntimeException e) {
-            Slog.e(TAG, "Failed to initialize FODCircleView", e);
         }
-    }
 
-    @Override
-    public void showInDisplayFingerprintView() {
-        if (mFodCircleView != null) {
-            mFodCircleView.show();
-        }
-    }
-
-    @Override
-    public void hideInDisplayFingerprintView() {
-        if (mFodCircleView != null) {
+        if (!mFodCircleView.viewAdded && show) {
+            mFodCircleView.show(isEnrolling);
+        } else if (mFodCircleView.viewAdded) {
             mFodCircleView.hide();
         }
     }

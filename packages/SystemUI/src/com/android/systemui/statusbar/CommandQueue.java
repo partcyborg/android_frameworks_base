@@ -100,8 +100,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_TOGGLE_NAVIGATION_EDITOR      = 50 << MSG_SHIFT;
     private static final int MSG_DISPATCH_NAVIGATION_EDITOR_RESULTS = 51 << MSG_SHIFT;
     private static final int MSG_TOGGLE_PIE_ORIENTATION        = 52 << MSG_SHIFT;
-    private static final int MSG_SHOW_IN_DISPLAY_FINGERPRINT_VIEW = 53 << MSG_SHIFT;
-    private static final int MSG_HIDE_IN_DISPLAY_FINGERPRINT_VIEW = 54 << MSG_SHIFT;
+    private static final int MSG_IN_DISPLAY_FINGERPRINT        = 53 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -183,6 +182,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void toggleFlashlight() {}
         default void toggleNavigationEditor() {}
         default void dispatchNavigationEditorResults(Intent intent) {}
+        default void handleInDisplayFingerprintView(boolean show, boolean isEnrolling) { }
     }
 
     @VisibleForTesting
@@ -615,16 +615,13 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void showInDisplayFingerprintView() {
+    public void handleInDisplayFingerprintView(boolean show, boolean isEnrolling) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_SHOW_IN_DISPLAY_FINGERPRINT_VIEW).sendToTarget();
-        }
-    }
-
-    @Override
-    public void hideInDisplayFingerprintView() {
-        synchronized (mLock) {
-            mHandler.obtainMessage(MSG_HIDE_IN_DISPLAY_FINGERPRINT_VIEW).sendToTarget();
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = show;
+            args.arg2 = isEnrolling;
+            mHandler.obtainMessage(MSG_IN_DISPLAY_FINGERPRINT, args)
+                    .sendToTarget();
         }
     }
 
@@ -859,6 +856,13 @@ public class CommandQueue extends IStatusBar.Stub {
                         mCallbacks.get(i).hideFingerprintDialog();
                     }
                     break;
+                case MSG_IN_DISPLAY_FINGERPRINT:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).handleInDisplayFingerprintView(
+                                (boolean)((SomeArgs)msg.obj).arg1,
+                                (boolean)((SomeArgs)msg.obj).arg2);
+                    }
+                    break;
                 case MSG_SHOW_CHARGING_ANIMATION:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showWirelessChargingAnimation(msg.arg1);
@@ -903,7 +907,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     Intent intent = (Intent) msg.obj;
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).dispatchNavigationEditorResults(intent);
-                    }
+                     }
                     break;
                 case MSG_SHOW_IN_DISPLAY_FINGERPRINT_VIEW:
                     for (int i = 0; i < mCallbacks.size(); i++) {

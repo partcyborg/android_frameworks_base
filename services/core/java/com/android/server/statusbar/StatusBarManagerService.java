@@ -745,21 +745,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
     }
 
     @Override
-    public void showInDisplayFingerprintView() {
+    public void handleInDisplayFingerprintView(boolean show, boolean isEnrolling) {
         if (mBar != null) {
             try {
-                mBar.showInDisplayFingerprintView();
-            } catch (RemoteException ex) {
-                // do nothing
-            }
-        }
-    }
-
-    @Override
-    public void hideInDisplayFingerprintView() {
-        if (mBar != null) {
-            try {
-                mBar.hideInDisplayFingerprintView();
+                mBar.handleInDisplayFingerprintView(show, isEnrolling);
             } catch (RemoteException ex) {
                 // do nothing
             }
