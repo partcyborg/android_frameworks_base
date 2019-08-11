@@ -11383,6 +11383,7 @@ public class PackageManagerService extends IPackageManager.Stub
                            Slog.e(TAG, "platformPkgSetting for " + pkgName + " is null!");
                            sigAllowed = true;
                         }
+                    }
 
                     if (!sigAllowed) {
                         throw new PackageManagerException("Overlay " + pkg.packageName +
