@@ -5450,7 +5450,7 @@ public class AudioService extends IAudioService.Stub
 
         private String getSoundEffectFilePath(int effectType) {
             String filePath = SOUND_EFFECTS_THEMED_PATH +
-                SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effect][0]));
+                SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effectType][0]);
             if (!new File(filePath).isFile()) {
                filePath = Environment.getProductDirectory() + SOUND_EFFECTS_PATH
                         + SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effectType][0]);
