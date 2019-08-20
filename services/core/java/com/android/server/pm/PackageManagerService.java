@@ -11369,16 +11369,20 @@ public class PackageManagerService extends IPackageManager.Stub
                     boolean sigAllowed = false;
                     for (String pkgName : wlSigApps) {
                         PackageSetting platformPkgSetting = mSettings.getPackageLPr(pkgName);
-                        sigAllowed = (platformPkgSetting.signatures.mSigningDetails
-                                != PackageParser.SigningDetails.UNKNOWN)
-                                && (compareSignatures(
-                                        platformPkgSetting.signatures.mSigningDetails.signatures,
-                                        pkg.mSigningDetails.signatures)
-                                                == PackageManager.SIGNATURE_MATCH);
-                        if (sigAllowed) {
-                            break;
+                        if (platformPkgSetting != null) {
+                           sigAllowed = (platformPkgSetting.signatures.mSigningDetails
+                                 != PackageParser.SigningDetails.UNKNOWN)
+                                 && (compareSignatures(
+                                          platformPkgSetting.signatures.mSigningDetails.signatures,
+                                          pkg.mSigningDetails.signatures)
+                                                   == PackageManager.SIGNATURE_MATCH);
+                           if (sigAllowed) {
+                              break;
+                           }
+                        } else {
+                           Slog.e(TAG, "platformPkgSetting for " + pkgName + " is null!");
+                           sigAllowed = true;
                         }
-                    }
 
                     if (!sigAllowed) {
                         throw new PackageManagerException("Overlay " + pkg.packageName +
